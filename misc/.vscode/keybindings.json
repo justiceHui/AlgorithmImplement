@@ -1,0 +1,6 @@
+// 키 바인딩을 이 파일에 넣어서 기본값 재정의
+//파일 > 기본설정 > 바로 가기 키
+[
+    { "key": "f10", "command": "workbench.action.tasks.build" }
+    { "key": "f11", "command": "workbench.action.tasks.test" }
+]
