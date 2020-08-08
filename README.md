@@ -10,6 +10,7 @@ algorithm implemention and also use as library
     * UnionFind.cpp
 * Geometry
     * BaseTool.cpp
+    * DualGraph.cpp
     * GrahamScan.cpp
     * PointInConvexPolygon.cpp
     * PointInPolygon.cpp
