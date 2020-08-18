@@ -6,7 +6,9 @@ algorithm implemention and also use as library
 * DataStructure
     * HLD.cpp
     * LiChaoTree.cpp
+    * O(1)LCA.cpp
     * O(N)CHT.cpp
+    * SparseTableRMQ.cpp
     * UnionFind.cpp
 * Geometry
     * BaseTool.cpp
@@ -15,7 +17,7 @@ algorithm implemention and also use as library
     * PointInConvexPolygon.cpp
     * PointInPolygon.cpp
     * RotatingCalipers.cpp
-    * SegemntIntersection.cpp
+    * SegmentIntersection.cpp
 * Graph (TODO)
     * BCC/SCC/2-SAT
     * Dinic

@@ -1,6 +1,3 @@
-// fast I/O
-// buf_size
-
 inline int readChar();
 template<class T = int> inline T readInt();
 template<class T> inline void writeInt(T x, char end = 0);
@@ -8,7 +5,7 @@ inline void writeChar(int x);
 inline void writeWord(const char *s);
 static const int buf_size = 1 << 18;
 inline int getChar(){
-    #ifdef ONLINE_JUDGE
+    #ifndef LOCAL
     static char buf[buf_size];
     static int len = 0, pos = 0;
     if(pos == len) pos = 0, len = fread(buf, 1, buf_size, stdin);
@@ -17,7 +14,7 @@ inline int getChar(){
     #endif
 }
 inline int readChar(){
-    #ifdef ONLINE_JUDGE
+    #ifndef LOCAL
     int c = getChar();
     while(c <= 32) c = getChar();
     return c;
@@ -27,7 +24,7 @@ inline int readChar(){
 }
 template <class T>
 inline T readInt(){
-    #ifdef ONLINE_JUDGE
+    #ifndef LOCAL
     int s = 1, c = readChar();
     T x = 0;
     if(c == '-') s = -1, c = getChar();
