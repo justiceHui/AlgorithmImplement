@@ -1,11 +1,6 @@
-ll ccw(const p &a, const p &b, const p &c){
-    ll dx1 = b.x - a.x, dy1 = b.y - a.y;
-    ll dx2 = c.x - b.x, dy2 = c.y - b.y;
-    ll res = dx1*dy2 - dx2*dy1;
-    if(res > 0) return 1;
-    if(res) return -1;
-    return 0;
-}
+// dependency : ./BaseTool.cpp
+// get dual of planar graph
+// Time Complexity : O(E log E), Space Complexity : O(V + E)
 
 // ith edge's face -> (i << 1), (i << 1 | 1)
 namespace DualGraph{

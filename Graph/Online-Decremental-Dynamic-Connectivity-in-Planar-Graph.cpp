@@ -1,6 +1,6 @@
-//
-// Created by jhnah on 2020-08-18.
-//
+// dependency :
+// Online Decremental Dynamic Connectivity in Planar Graphs
+// Time Complexity : O((N+Q) log N), amortized O(log N) per query, Space Complexity : O(V + E)
 
 #include <bits/stdc++.h>
 #define all(v) v.begin(), v.end()

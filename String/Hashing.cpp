@@ -10,7 +10,7 @@ struct Hashing{
 	ll p, mod;
 	
 	Hashing(){
-		p = 1e9-63, mod = 524287;
+		p = 1e9-63, mod = 179;
 	}
 	
 	Hashing(ll _p, ll _mod) : p(_p), mod(_mod) {}
