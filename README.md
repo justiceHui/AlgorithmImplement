@@ -11,9 +11,11 @@ algorithm implemention and also use as library
     * O(N)CHT.cpp
     * SparseTableRMQ.cpp
     * UnionFind.cpp
-    * Centroid (TODO)
-    * SplayTree (TODO)
-    * LinkCutTree (TODO)
+    * TODO
+        * Centroid
+        * SplayTree
+        * Tree Compress?
+        * LinkCutTree
 * Geometry
     * BaseTool.cpp
     * DualGraph.cpp
@@ -22,28 +24,34 @@ algorithm implemention and also use as library
     * PointInPolygon.cpp
     * RotatingCalipers.cpp
     * SegmentIntersection.cpp
-    * HPI (TODO)
+    
+    * TODO
+        * HPI
+        * Voronoi
 * Graph
     * Dinic.cpp
     * zkwMCMF.cpp
-    * BCC/SCC/2-SAT (TODO)
-    * Hopcroft-Karp (TODO)
-    * MCMF (TODO)
+    * TODO
+        * BCC/SCC/2-SAT
+        * Hopcroft-Karp
+        * MCMF
 * Math (TODO)
     * ExtendGCD.cpp
     * Fraction.cpp
-    * Berlekamp (TODO)
-    * FFT (TODO)
-    * Kitamata (TODO)
-    * Matrix Multiply (TODO)
-    * ModInt (TODO)
+    * MatrixMultiply-SIMD.cpp
+    * TODO
+        * Berlekamp
+        * FFT
+        * Kitamata
+        * ModInt
     * **I Hate Math**
 * String (TODO)
     * Hashing.cpp
     * Trie.cpp
-    * Aho-Corasick (TODO, need fast impl)
-    * KMP TODO()
-    * SA-LCP (TODO)
+    * TODO
+        * Aho-Corasick (need fast impl)
+        * KMP
+        * SA-LCP
 * misc
 	* FastInput.cpp
 	* Mo.cpp
