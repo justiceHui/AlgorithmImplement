@@ -29,6 +29,7 @@ algorithm implemention and also use as library
         * Voronoi
 * Graph
     * Dinic.cpp
+    * GlobalMinCut.cpp
     * zkwMCMF.cpp
     * TODO
         * BCC/SCC/2-SAT
