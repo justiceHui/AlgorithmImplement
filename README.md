@@ -28,12 +28,14 @@ algorithm implemention and also use as library
     * TODO
         * Voronoi
 * Graph
+    * BipartiteMatching.cpp
     * Dinic.cpp
+    * GeneralMatching.cpp
     * GlobalMinCut.cpp
+    * TwoSat.cpp
     * zkwMCMF.cpp
     * TODO
-        * BCC/SCC/2-SAT
-        * Hopcroft-Karp
+        * BCC
         * MCMF
 * Math (TODO)
     * ExtendGCD.cpp
