@@ -10,22 +10,22 @@ algorithm implemention and also use as library
     * O(1)LCA.cpp
     * O(n)CHT.cpp
     * SparseTableRMQ.cpp
+    * Splay-LCT.cpp
     * UnionFind.cpp
     * TODO
         * Centroid
-        * SplayTree
         * Tree Compress?
-        * LinkCutTree
 * Geometry
     * BaseTool.cpp
     * DualGraph.cpp
     * GrahamScan.cpp
+    * HPI.cpp
+    * KD-Tree.cpp
     * PointInConvexPolygon.cpp
     * PointInPolygon.cpp
     * RotatingCalipers.cpp
     * SegmentIntersection.cpp
     * TODO
-        * HPI
         * Voronoi
 * Graph
     * Dinic.cpp
