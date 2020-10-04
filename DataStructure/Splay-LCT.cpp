@@ -1,3 +1,8 @@
+// Splay Tree + Link Cut Tree
+// Time Complexity : amortimzed O(log N)
+// splay_init(element_count), lct_init(vertex_count)
+// verify : BOJ13159(Splay Tree), BOJ13539(Link Cut Tree)
+
 const int SPLAY_TREE = 1;
 const int LINK_CUT_TREE = 2;
 struct LinkCutNode{
