@@ -38,13 +38,14 @@ algorithm implemention and also use as library
         * BCC
         * MCMF
 * Math (TODO)
+    * Berlekamp-Kitamasa.cpp
     * ExtendGCD.cpp
+    * FFT.cpp
     * Fraction.cpp
     * MatrixMultiply-SIMD.cpp
+    * MillerRabin-PollardRho.cpp
+    * NTT.cpp
     * TODO
-        * Berlekamp
-        * FFT
-        * Kitamata
         * ModInt
     * **I Hate Math**
 * String (TODO)
