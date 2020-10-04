@@ -8,7 +8,7 @@ algorithm implemention and also use as library
     * HLD.cpp
     * LiChaoTree.cpp
     * O(1)LCA.cpp
-    * O(N)CHT.cpp
+    * O(n)CHT.cpp
     * SparseTableRMQ.cpp
     * UnionFind.cpp
     * TODO
@@ -24,7 +24,6 @@ algorithm implemention and also use as library
     * PointInPolygon.cpp
     * RotatingCalipers.cpp
     * SegmentIntersection.cpp
-    
     * TODO
         * HPI
         * Voronoi
