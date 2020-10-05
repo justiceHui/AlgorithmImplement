@@ -15,8 +15,7 @@ struct CHT{
 	}
 	void insert(Line l){
 		if(v.size() > pv && v.back().a == l.a){
-			if(l.b < v.back().b) l = v.back();
-			v.pop_back();
+			if(l.b < v.back().b) l = v.back(); v.pop_back();
 		}
 		while(v.size() >= pv+2 && chk(v[v.size()-2], v.back(), l)) v.pop_back();
 		v.push_back(l);
@@ -26,4 +25,4 @@ struct CHT{
 		while(pv+1 < v.size() && v[pv].f(x) <= v[pv+1].f(x)) pv++;
 		return {v[pv].f(x), v[pv].c};
 	}
-} cht;
+};
