@@ -37,9 +37,9 @@ struct LinkCutTree{
         for(int i=1; i<=n; i++) nd[i] = new LinkCutNode(i);
     }
     void update(LinkCutNode *x){
-        x->mn = x->v;
-        if(x->l) x->mn = min(x->mn, x->l->mn);
-        if(x->r) x->mn = min(x->mn, x->r->mn);
+        x->mn = x->v; x->sz = 1;
+        if(x->l) x->mn = min(x->mn, x->l->mn), x->sz += x->l->sz;
+        if(x->r) x->mn = min(x->mn, x->r->mn), x->sz += x->r->sz;
     }
     void push(LinkCutNode *x){
         if(!x->flip) return;
@@ -126,39 +126,40 @@ struct LinkCutTree{
             update(nxt); splay(x);
         }
     }
-    LinkCutNode* lct_root(LinkCutNode *x) {
-        access(x); push(x);
+    LinkCutNode* lct_root(int _x){
+        auto x = nd[_x]; access(x); push(x);
         while(x->l){ x = x->l; push(x); }
         access(x); return x;
     }
-    LinkCutNode* lct_par(LinkCutNode *x) {
-        access(x); push(x);
+    LinkCutNode* lct_par(int _x){
+        auto x = nd[_x]; access(x); push(x);
         if (!x->l) return nullptr;
         x = x->l; push(x);
         while(x->r){ x = x->r; push(x); }
         access(x); return x;
     }
-    LinkCutNode* lct_lca(LinkCutNode *s, LinkCutNode *t){
-        access(s); access(t); splay(s);
+    LinkCutNode* lct_lca(int _s, int _t){
+        auto s = nd[_s], t = nd[_t]; access(s); access(t); splay(s);
         if(!s->pp) return s;
         return s->pp;
     }
-    void lct_link(LinkCutNode *son, LinkCutNode *par) {
+    void lct_link(int _son, int _par){
+        auto son = nd[_son], par = nd[_par];
         access(par); access(son);
         son->flip ^= 1; // remove if needed
         push(son);
         son->l = par; par->p = son;
         update(son);
     }
-    void lct_cut(LinkCutNode *son){
-        access(son); push(son);
+    void lct_cut(int _son){
+        auto son = nd[_son]; access(son); push(son);
         if(son->l){ son->l = son->l->p = nullptr; }
         update(son);
     }
     void inorder(LinkCutNode *x){
         push(x);
         if(x->l) inorder(x->l);
-        if(!x->dummy) cout << x->v << " ";
+        if(!x->dummy) print(x);
         if(x->r) inorder(x->r);
     }
-} tree;
+};
