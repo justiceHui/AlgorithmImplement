@@ -3,53 +3,65 @@
 // Dinic's Algorithm
 // Time Complexity : O(V^2 E), Space Complexity : O(V + E)
 
-const int SZ = 888;
+template<typename FlowType, size_t _Sz, FlowType _Inf=1'000'000'007>
 struct Dinic{
-    using FlowType = int;
-    const FlowType flow_max = 1e9;
-    int s, t; // source, sink;
     struct Edge{ int v, dual; FlowType c; };
-    vector<Edge> g[SZ];
-    void addEdge(int s, int e, FlowType x){
-        g[s].push_back({e, (int)g[e].size(), x});
-        g[e].push_back({s, (int)g[s].size()-1, 0});
+    int Level[_Sz], Work[_Sz];
+    vector<Edge> G[_Sz];
+    void clear(){ for(int i=0; i<_Sz; i++) G[i].clear(); }
+    void AddEdge(int s, int e, FlowType x){
+        G[s].push_back({e, (int)G[e].size(), x});
+        G[e].push_back({s, (int)G[s].size()-1, 0});
     }
-    int lv[SZ], work[SZ];
-    bool bfs(){
-        memset(lv, -1, sizeof lv);
-        queue<int> q; q.push(s); lv[s] = 0;
-        while(!q.empty()){
-            int v = q.front(); q.pop();
-            for(auto i : g[v]){
-                if(lv[i.v] == -1 && i.c > 0){
-                    q.push(i.v); lv[i.v] = lv[v] + 1;
-                }
+    bool BFS(int S, int T){
+        memset(Level, 0, sizeof Level);
+        queue<int> Q; Q.push(S); Level[S] = 1;
+        while(Q.size()){
+            int v = Q.front(); Q.pop();
+            for(const auto &i : G[v]){
+                if(!Level[i.v] && i.c) Q.push(i.v), Level[i.v] = Level[v] + 1;
             }
         }
-        return lv[t] != -1;
+        return Level[T];
     }
-    FlowType dfs(int v, int tot){
-        if(v == t) return tot;
-        for(int &_i=work[v]; _i<g[v].size(); _i++){
-            Edge &i = g[v][_i];
-            if(lv[i.v] == lv[v] + 1 && i.c > 0){
-                int fl = dfs(i.v, min(tot, i.c));
-                if(fl > 0){
-                    i.c -= fl;
-                    g[i.v][i.dual].c += fl;
-                    return fl;
-                }
-            }
+    FlowType DFS(int v, int T, FlowType tot){
+        if(v == T) return tot;
+        for(int &_i=Work[v]; _i<G[v].size(); _i++){
+            Edge &i = G[v][_i];
+            if(Level[i.v] != Level[v] + 1 || !i.c) continue;
+            FlowType fl = DFS(i.v, T, min(tot, i.c));
+            if(!fl) continue;
+            i.c -= fl;
+            G[i.v][i.dual].c += fl;
+            return fl;
         }
         return 0;
     }
-    FlowType run(int _s, int _t){
-        s = _s; t = _t; FlowType ret = 0;
-        while(bfs()){
-            memset(work, 0, sizeof work);
-            FlowType tmp;
-            while((tmp = dfs(s, flow_max))) ret += tmp;
+    FlowType MaxFlow(int S, int T){
+        FlowType ret = 0, tmp;
+        while(BFS(S, T)){
+            memset(Work, 0, sizeof Work);
+            while((tmp = DFS(S, T, _Inf))) ret += tmp;
         }
         return ret;
+    }
+    tuple<FlowType, vector<int>, vector<int>, vector<pair<int, int>>> MinCut(int S, int T){
+        FlowType fl = MaxFlow(S, T);
+        vector<int> a, b;
+        vector<pair<int, int>> edges;
+        const int Bias = 1e9;
+        queue<int> Q; Q.push(S); Level[S] += Bias;
+        while(Q.size()){
+            int v = Q.front(); Q.pop();
+            for(const auto &i : G[v]){
+                if(!Level[i.v]) edges.emplace_back(v, i.v);
+                else if(Level[i.v] < Bias) Q.push(i.v), Level[i.v] += Bias;
+            }
+        }
+        for(int i=0; i<_Sz; i++){
+            if(Level[i]) a.push_back(i);
+            else b.push_back(i);
+        }
+        return make_tuple(fl, a, b, edges);
     }
 };

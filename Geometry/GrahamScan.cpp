@@ -2,17 +2,17 @@
 // get 2D convex hull
 // Time Complexity : O(N log N), Space Complexity : O(N)
 
-vector<p> convex_hull(vector<p> &v){
-    vector<p> ret;
-    swap(v[0], *min_element(all(v)));
-    sort(v.begin()+1, v.end(), [&](const p &a, const p &b){
-        auto cw = ccw(v[0], a, b);
+vector<Point> ConvexHull(vector<Point> &V){
+    swap(V[0], *min_element(all(V)));
+    sort(V.begin()+1, V.end(), [&V](const Point &p1, const Point &p2){
+        int cw = CCW(V[0], p1, p2);
         if(cw) return cw > 0;
-        return dst(v[0], a) < dst(v[0], b);
+        return D(V[0], p1) < D(V[0], p2);
     });
-    for(const auto &i : v){
-        while(ret.size() >= 2 && ccw(ret[ret.size()-2], ret.back(), i) <= 0) ret.pop_back();
-        ret.push_back(i);
+    vector<Point> hull;
+    for(const auto &i : V){
+        while(hull.size() >= 2 && CCW(hull[hull.size()-2], hull.back(), i) <= 0) hull.pop_back();
+        hull.push_back(i);
     }
-    return ret;
+    return move(hull);
 }

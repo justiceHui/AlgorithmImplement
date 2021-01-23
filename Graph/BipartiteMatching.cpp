@@ -2,58 +2,61 @@
 // Time Complexity : O(E sqrt V)
 // verify : BOJ2544
 
-namespace BipartiteMatching{
-    const int S = 333;
-    vector<int> g[S];
-    int dst[S], l[S], r[S], chk[S];
-    void clear(){ for(int i=0; i<S; i++) g[i].clear(); }
-    void addEdge(int s, int e){ g[s].push_back(e); }
-    int bfs(int n){
-        queue<int> q; int ret = 0;
-        memset(dst, 0, sizeof dst);
-        for(int i=1; i<=n; i++) if(l[i] == -1 && !dst[i]){
-            q.push(i); dst[i] = 1;
+template<size_t _N, size_t _M>
+struct BMatch{
+    vector<int> G[_N];
+    int Dist[_N], L[_N], R[_M];
+    bitset<_N> Visit;
+    bitset<_N+_M> Track;
+    void clear(){ for(int i=0; i<_N; i++) G[i].clear(); Track.reset(); }
+    void AddEdge(int s, int e){ G[s].push_back(e); }
+    bool BFS(int N){
+        bool ret = false;
+        queue<int> Q;
+        memset(Dist, 0, sizeof Dist);
+        for(int i=1; i<=N; i++){
+            if(L[i] == -1 && !Dist[i]) Q.push(i), Dist[i] = 1;
         }
-        while(!q.empty()){
-            int v = q.front(); q.pop();
-            for(auto i : g[v]){
-                if(r[i] == -1) ret = 1;
-                else if(!dst[r[i]]) dst[r[i]] = dst[v] + 1, q.push(r[i]);
+        while(Q.size()){
+            int v = Q.front(); Q.pop();
+            for(const auto &i : G[v]){
+                if(R[i] == -1) ret = true;
+                else if(!Dist[R[i]]) Dist[R[i]] = Dist[v] + 1, Q.push(R[i]);
             }
         }
         return ret;
     }
-    int dfs(int v){
-        if(chk[v]) return 0; chk[v] = 1;
-        for(auto i : g[v]){
-            if(r[i] == -1 || !chk[r[i]] && dst[r[i]] == dst[v] + 1 && dfs(r[i])){
-                l[v] = i; r[i] = v; return 1;
+    bool DFS(int v){
+        if(Visit[v]) return false;
+        Visit[v] = true;
+        for(const auto &i : G[v]){
+            if(R[i] == -1 || !Visit[R[i]] && Dist[R[i]] == Dist[v] + 1 && DFS(R[i])){
+                L[v] = i; R[i] = v; return true;
             }
         }
-        return 0;
+        return false;
     }
-    int match(int n){
-        memset(l, -1, sizeof l);
-        memset(r, -1, sizeof r);
+    int Match(int N){
+        memset(L, -1, sizeof L);
+        memset(R, -1, sizeof R);
         int ret = 0;
-        while(bfs(n)){
-            memset(chk, 0, sizeof chk);
-            for(int i=1; i<=n; i++) if(l[i] == -1 && dfs(i)) ret++;
+        while(BFS(N)){
+            Visit.reset();
+            for(int i=1; i<=N; i++) if(L[i] == -1 && DFS(i)) ret++;
         }
         return ret;
     }
-    int track[S+S];
-    void rdfs(int v, int n){
-        if(track[v]) return; track[v] = 1;
-        for(auto i : g[v]) track[i+n] = 1, rdfs(r[i], n);
+    void DFS2(int v, int N){
+        if(Track[v]) return;
+        Track[v] = true;
+        for(const auto &i : G[v]) Track[i+N] = true, DFS2(R[i], N);
     }
-    vector<int> getCover(int n, int m){
-        match(n);
-        memset(track, 0, sizeof track);
-        for(int i=1; i<=n; i++) if(l[i] == -1) rdfs(i, n);
-        vector<int> ret;
-        for(int i=1; i<=n; i++) if(!track[i]) ret.push_back(i);
-        for(int i=n+1; i<=n+m; i++) if(track[i]) ret.emplace_back(i);
-        return ret;
+    pair<vector<int>, vector<int>> MinVertexCover(int N, int M){
+        Match(N);
+        for(int i=1; i<=N; i++) if(L[i] == -1) DFS2(i, N);
+        vector<int> a, b;
+        for(int i=1; i<=N; i++) if(!Track[i]) a.push_back(i);
+        for(int i=N+1; i<=N+M; i++) if(Track[i]) b.push_back(i-N);
+        return make_pair(a, b);
     }
-}
+};

@@ -1,105 +1,89 @@
 // dependency :
 // get Min Cost Max Flow
 // zkw MCMF (hell-joseon MCMF)
-// optimized for sparse graph
+// optimized for short-augmenting-path
 
-const int SZ = 222;
-struct MCMF{
-    using FlowType = int;
-    using CostType = int;
-    const CostType cost_max = 1e9;
-    int s, t; //source, sink
+template<typename FlowType, typename CostType, int _Sz, FlowType _Inf_f=1'000'000'007, CostType _Inf=1'000'000'007>
+struct ZKW{
     struct Edge{ int v, dual; FlowType c; CostType d; };
-    vector<Edge> g[SZ];
-    void addEdge(int s, int e, FlowType c, CostType d){
-        g[s].push_back({e, (int)g[e].size(), c, d});
-        g[e].push_back({s, (int)g[s].size()-1, 0, -d});
+    vector<Edge> G[_Sz];
+    bool InQ[_Sz], Check[_Sz];
+    CostType Pi[_Sz], Dist[_Sz];
+    int Work[_Sz];
+    void AddEdge(int s, int e, FlowType c, CostType d){
+        G[s].push_back({e, (int)G[e].size(), c, d});
+        G[e].push_back({s, (int)G[s].size()-1, 0, -d});
     }
-    
-    int inq[SZ]; CostType h[SZ]; //johnson's algorithm, spfa
-    CostType dst[SZ]; //dijkstra
-    void init(int _s, int _t){
-        s = _s, t = _t;
-        fill(h, h+SZ, cost_max);
-        fill(dst, dst+SZ, cost_max);
-        
-        //johnson's algorithm with spfa
-        queue<int> q; q.push(s); inq[s] = 1;
-        while(q.size()){
-            int now = q.front(); q.pop(); inq[now] = 0;
-            for(auto i : g[now]){
-                if(i.c && h[i.v] > h[now] + i.d){
-                    h[i.v] = h[now] + i.d;
-                    if(!inq[i.v]) inq[i.v] = 1, q.push(i.v);
+    void Init(int S, int T){
+        fill(Pi, Pi+_Sz, _Inf);
+        fill(Dist, Dist+_Sz, _Inf);
+
+        // Johnson's Algorithm with SPFA
+        memset(InQ, false, sizeof InQ);
+        queue<int> Q; Q.push(S); InQ[S] = true;
+        while(Q.size()){
+            int v = Q.front(); Q.pop(); InQ[v] = false;
+            for(const auto &i : G[v]){
+                if(i.c && Pi[i.v] > Pi[v] + i.d){
+                    Pi[i.v] = Pi[v] + i.d;
+                    if(!InQ[i.v]) InQ[i.v] = true, Q.push(i.v);
                 }
             }
         }
-        
-        for(int i=0; i<SZ; i++){
-            for(auto &j : g[i]) if(j.c) j.d += h[i] - h[j.v];
-        }
-        
-        //get shortest path DAG with dijkstra
-        priority_queue<pair<CostType, int>> pq; pq.emplace(0, s); dst[s] = 0;
+        for(int i=0; i<_Sz; i++) for(auto &j : G[i]) if(j.c) j.d += Pi[i] - Pi[j.v];
+
+        // Get Shortest Path DAG with Dijkstra
+        priority_queue<pair<CostType, int>> pq; pq.emplace(0, S); Dist[S] = 0;
         while(pq.size()){
-            int now = pq.top().y;
-            CostType cst = -pq.top().x;
-            pq.pop();
-            if(dst[now] != cst) continue;
-            for(auto i : g[now]){
-                if(i.c && dst[i.v] > dst[now] + i.d){
-                    dst[i.v] = dst[now] + i.d;
-                    pq.emplace(-dst[i.v], i.v);
+            auto [cst, now] = pq.top(); pq.pop(); cst = -cst;
+            if(Dist[now] != cst) continue;
+            for(auto i : G[now]){
+                if(i.c && Dist[i.v] > Dist[now] + i.d){
+                    Dist[i.v] = Dist[now] + i.d;
+                    pq.emplace(-Dist[i.v], i.v);
                 }
             }
         }
-        for(int i=0; i<SZ; i++) dst[i] += h[t] - h[s];
+        for(int i=0; i<_Sz; i++) Dist[i] += Pi[T] - Pi[S];
     }
-    
-    int chk[SZ], work[SZ];
-    
-    bool update(){ //update shortest path DAG in O(V+E)
-        CostType mn = cost_max;
-        for(int i=0; i<SZ; i++){
-            if(!chk[i]) continue;
-            for(auto j : g[i]){
-                if(j.c && !chk[j.v]) mn = min(mn, dst[i] + j.d - dst[j.v]);
+    bool Update(){ // Update DAG in O(V+E)
+        CostType mn = _Inf;
+        for(int i=0; i<_Sz; i++){
+            if(!Check[i]) continue;
+            for(const auto &j : G[i]){
+                if(j.c && !Check[j.v]) mn = min(mn, Dist[i] + j.d - Dist[j.v]);
             }
         }
-        if(mn == cost_max) return 0;
-        for(int i=0; i<SZ; i++){
-            if(!chk[i]) dst[i] += mn;
-        }
-        return 1;
+        if(mn == _Inf) return false;
+        for(int i=0; i<_Sz; i++) if(!Check[i]) Dist[i] += mn;
+        return true;
     }
-    FlowType dfs(int now, FlowType fl){
-        chk[now] = 1;
-        if(now == t) return fl;
-        for(; work[now] < g[now].size(); work[now]++){
-            auto &i = g[now][work[now]];
-            if(!chk[i.v] && dst[i.v] == dst[now] + i.d && i.c){
-                FlowType ret = dfs(i.v, min(fl, i.c));
-                if(ret > 0){
-                    i.c -= ret; g[i.v][i.dual].c += ret;
-                    return ret;
-                }
-            }
+    FlowType DFS(int v, int T, FlowType tot){
+        Check[v] = true;
+        if(v == T) return tot;
+        for(int &_i=Work[v]; _i<G[v].size(); _i++){
+            auto &i = G[v][_i];
+            if(Check[i.v] || !i.c || Dist[i.v] != Dist[v] + i.d) continue;
+            FlowType fl = DFS(i.v, T, min(tot, i.c));
+            if(!fl) continue;
+            i.c -= fl;
+            G[i.v][i.dual].c += fl;
+            return fl;
         }
         return 0;
     }
-    pair<CostType, FlowType> run(int _s, int _t){ //{cost, flow}
-        init(_s, _t);
-        CostType cst = 0; FlowType fl = 0;
+    pair<FlowType, CostType> MinCostFlow(int S, int T){
+        Init(S, T);
+        FlowType fl = 0, tmp; CostType cst = 0;
         do{
-            memset(chk, 0, sizeof chk);
-            memset(work, 0, sizeof work);
-            FlowType now;
-            while((now = dfs(s, 1e9)) > 0){
-                cst += dst[t] * now;
-                fl += now;
-                memset(chk, 0, sizeof chk);
+            memset(Check, false, sizeof Check);
+            memset(Work, 0, sizeof Work);
+            while((tmp = DFS(S, T, _Inf_f))){
+                fl += tmp;
+                cst += Dist[T] * tmp;
+                memset(Check, false, sizeof Check);
             }
-        }while(update());
-        return {cst, fl};
+        }while(Update());
+        return make_pair(fl, cst);
     }
 };
