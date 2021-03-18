@@ -1,5 +1,5 @@
-// BOJ 13725 RNG
-// https://www.acmicpc.net/problem/13725
+// codechef RNG (Random Number Generator)
+// BOJ 13725
 
 #include <bits/stdc++.h>
 #define x first
@@ -22,36 +22,36 @@ struct MINT{
         if(v < 0) v += M;
     }
 
-    friend istream& operator >> (istream &is, MINT<M> &a) { ll t; is >> t; a = MINT(t); return is; }
-    friend ostream& operator << (ostream &os, const MINT<M> &a) { return os << a.v; }
-    friend bool operator == (const MINT<M> &a, const MINT<M> &b) { return a.v == b.v; }
-    friend bool operator != (const MINT<M> &a, const MINT<M> &b) { return a.v != b.v; }
-    friend MINT<M> pw(MINT<M> a, ll b){
-        MINT<M> ret= 1;
+    friend istream& operator >> (istream &is, MINT &a) { ll t; is >> t; a = MINT(t); return is; }
+    friend ostream& operator << (ostream &os, const MINT &a) { return os << a.v; }
+    friend bool operator == (const MINT &a, const MINT &b) { return a.v == b.v; }
+    friend bool operator != (const MINT &a, const MINT &b) { return a.v != b.v; }
+    friend MINT pw(MINT a, ll b){
+        MINT ret= 1;
         while(b){
             if(b & 1) ret *= a;
             b >>= 1; a *= a;
         }
         return ret;
     }
-    friend MINT<M> inv(const MINT<M> a) { return pw(a, M-2); }
-    MINT<M> operator - () const { return MINT(-v); }
-    MINT<M>& operator += (const MINT<M> m) { if((v += m.v) >= M) v -= M; return *this; }
-    MINT<M>& operator -= (const MINT<M> m) { if((v -= m.v) < 0) v += M; return *this; }
-    MINT<M>& operator *= (const MINT<M> m) { v = (ll)v*m.v%M; return *this; }
-    MINT<M>& operator /= (const MINT<M> m) { *this *= inv(m); return *this; }
-    friend MINT<M> operator + (MINT<M> a, MINT<M> b) { a += b; return a; }
-    friend MINT<M> operator - (MINT<M> a, MINT<M> b) { a -= b; return a; }
-    friend MINT<M> operator * (MINT<M> a, MINT<M> b) { a *= b; return a; }
-    friend MINT<M> operator / (MINT<M> a, MINT<M> b) { a /= b; return a; }
+    friend MINT inv(const MINT a) { return pw(a, M-2); }
+    MINT operator - () const { return MINT(-v); }
+    MINT& operator += (const MINT m) { if((v += m.v) >= M) v -= M; return *this; }
+    MINT& operator -= (const MINT m) { if((v -= m.v) < 0) v += M; return *this; }
+    MINT& operator *= (const MINT m) { v = (ll)v*m.v%M; return *this; }
+    MINT& operator /= (const MINT m) { *this *= inv(m); return *this; }
+    friend MINT operator + (MINT a, MINT b) { a += b; return a; }
+    friend MINT operator - (MINT a, MINT b) { a -= b; return a; }
+    friend MINT operator * (MINT a, MINT b) { a *= b; return a; }
+    friend MINT operator / (MINT a, MINT b) { a /= b; return a; }
     operator int32_t() const { return v; }
     operator int64_t() const { return v; }
 };
 
-template<int W, int M>
-struct NTT{
-    using T = MINT<M>;
-    static void FFT(vector<T> &f, bool inv_fft = false){
+namespace fft{
+    template<int W, int M>
+    static void NTT(vector<MINT<M>> &f, bool inv_fft = false){
+        using T = MINT<M>;
         int N = f.size();
         vector<T> root(N >> 1);
         for(int i=1, j=0; i<N; i++){
@@ -77,15 +77,16 @@ struct NTT{
             for(int i=0; i<N; i++) f[i] *= rev;
         }
     }
-    static vector<T> multiply(vector<T> a, vector<T> b){
+    template<int W, int M>
+    vector<MINT<M>> multiply_ntt(vector<MINT<M>> a, vector<MINT<M>> b){
         int N = 2; while(N < a.size() + b.size()) N <<= 1;
         a.resize(N); b.resize(N);
-        FFT(a); FFT(b);
+        NTT<W, M>(a); NTT<W, M>(b);
         for(int i=0; i<N; i++) a[i] *= b[i];
-        FFT(a, true);
+        NTT<W, M>(a, true);
         return a;
     }
-};
+}
 
 template<int W, int M>
 struct PolyMod{
@@ -149,7 +150,7 @@ struct PolyMod{
         return *this;
     }
     PolyMod operator *= (const PolyMod &b){
-        *this = NTT<W, M>::multiply(a, b.a);
+        *this = fft::multiply_ntt<W, M>(a, b.a);
         normalize();
         return *this;
     }
@@ -172,8 +173,8 @@ struct PolyMod{
     }
 
     // operator
-    PolyMod operator * (const T x) const { return poly(*this) *= x; }
-    PolyMod operator / (const T x) const { return poly(*this) /= x; }
+    PolyMod operator * (const T x) const { return PolyMod(*this) *= x; }
+    PolyMod operator / (const T x) const { return PolyMod(*this) /= x; }
     PolyMod operator + (const PolyMod &b) const { return PolyMod(*this) += b; }
     PolyMod operator - (const PolyMod &b) const { return PolyMod(*this) -= b; }
     PolyMod operator * (const PolyMod &b) const { return PolyMod(*this) *= b; }
@@ -185,20 +186,18 @@ constexpr int W = 3, MOD = 104857601;
 using mint = MINT<MOD>;
 using poly = PolyMod<W, MOD>;
 
-mint kitamasa(poly rec, poly dp, ll n){
+mint kitamasa(poly c, poly a, ll n){
     poly d = vector<mint>{1};
-    poly shift = vector<mint>{0, 1};
+    poly xn = vector<mint>{0, 1};
     poly f;
-    for(int i=0; i < rec.size(); i++) f.push_back(-rec[i]);
+    for(int i=0; i<c.size(); i++) f.push_back(-c[i]);
     f.push_back(1);
-
     while(n){
-        if(n & 1) d = (d * shift) % f;
-        n >>= 1; shift = shift * shift % f;
+        if(n & 1) d = d * xn % f;
+        n >>= 1; xn = xn * xn % f;
     }
-
     mint ret = 0;
-    for(int i=0; i <= dp.deg(); i++) ret += dp[i] * d[i];
+    for(int i=0; i<=a.deg(); i++) ret += a[i] * d[i];
     return ret;
 }
 
@@ -206,8 +205,12 @@ int main(){
     ios_base::sync_with_stdio(false); cin.tie(nullptr);
     ll K, N; cin >> K >> N;
     vector<mint> v_dp(K), v_rec(K);
-    for(auto &i : v_dp) cin >> i;
-    for(auto &i : v_rec) cin >> i;
+    for(int i=0; i<K; i++){
+        int t; cin >> t; v_dp[i] = mint(t);
+    }
+    for(int i=0; i<K; i++){
+        int t; cin >> t; v_rec[i] = mint(t);
+    }
     reverse(all(v_rec));
     poly dp(v_dp), rec(v_rec);
     cout << kitamasa(rec, dp, N-1);
