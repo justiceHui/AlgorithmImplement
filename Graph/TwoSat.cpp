@@ -39,7 +39,7 @@ struct TwoSat{
     vector<int> val, comp, z; int pv = 0;
     int dfs(int i){
         int low = val[i] = ++pv, x; z.push_back(i);
-        for(int e : g[i]) if(!comp[e]) low = min(low, val[e] ?: dfs(e));
+        for(int e : g[i]) if(!comp[e]) low = min(low, val[e] ? val[e] : dfs(e));
         if(low == val[i]){
             do{
                 x = z.back(); z.pop_back();
