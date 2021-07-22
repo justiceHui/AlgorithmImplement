@@ -1,100 +1,83 @@
 using PII = pair<int, int>;
 
-struct SplayNode{
-    SplayNode *l, *r, *p;
-    int sz;
-    SplayNode() : sz(1) { l = r = p = nullptr; }
-    ~SplayNode(){ if(l) delete l; if(r) delete r; }
-    bool is_left() const { return p && this == p->l; }
-    bool is_root() const { return !p || (this != p->l && this != p->r); }
-    friend int get_sz(const SplayNode *x){ return x == nullptr ? 0 : x->sz; }
-    void update(){ sz = 1 + get_sz(l) + get_sz(r); }
-    void push(){ }
-    void rotate(){
-        p->push(); push();
-        if(is_left()) r && (r->p = p), p->l = r, r = p;
-        else l && (l->p = p), p->r = l, l = p;
-        if(p->p) (p->is_left()? p->p->l : p->p->r) = this;
-        auto *t = p; p = t->p; t->p = this;
-        t->update(); update();
+inline ll f(int s, int e){ return s * MAX_N + e; }
+namespace splayTree{
+    struct SplayNode{
+        SplayNode *p, *l, *r;
+        int a, b, sz, flag;
+        SplayNode() : SplayNode(-1, -1){}
+        SplayNode(int a, int b) : a(a), b(b) { l = r = p = nullptr; sz = 1; flag = 0; };
+        friend int get_sz(const SplayNode *x) { return x ? x->sz : 0; }
+        bool is_left() const { return p && this == p->l; }
+        void update(){
+            sz = 1 + get_sz(l) + get_sz(r);
+        }
+        void rotate(){
+            if(is_left()) r && (r->p = p), p->l = r, r = p;
+            else l && (l->p = p), p->r = l, l = p;
+            if(p->p) (p->is_left()? p->p->l : p->p->r) = this;
+            auto *t = p; p = t->p; t->p = this;
+            t->update(); update();
+        }
+    };
+    void splay(SplayNode *x){
+        for(; x->p; x->rotate()){
+            if(x->p->p) (x->is_left() ^ x->p->is_left() ? x : x->p)->rotate();
+        }
     }
-};
-SplayNode* splay(SplayNode *x){
-    for(; !x->is_root(); x->rotate()){
-        if(!x->p->is_root()) x->p->p->push(); x->p->push(); x->push();
-        if(!x->p->is_root()) (x->is_left() ^ x->p->is_left() ? x : x->p)->rotate();
+    SplayNode* concat(SplayNode *a, SplayNode *b){
+        while(a->r) a = a->r; splay(a);
+        a->r = b; b->p = a; a->update();
+        return a;
     }
-    x->push();
-    return x;
-}
-SplayNode* insertRight(SplayNode *root, SplayNode *x){
-    if(!root) return x;
-    while(root->r) root = root->r;
-    splay(root);
-    root->r = x; x->p = root;
-    root->update();
-    return splay(x);
-}
-SplayNode* concat(SplayNode *a, SplayNode *b){
-    while(a->r) a = a->r; splay(a);
-    a->r = b; b->p = a;
-    a->update();
-    return splay(b);
-}
-bool sameTree(SplayNode *a, SplayNode *b){
-    splay(a);
-    SplayNode *x = b;
-    while(x->p) x = x->p; splay(b);
-    return a == x;
+    bool is_same_tree(SplayNode *a, SplayNode *b){
+        splay(a); splay(b);
+        while(a->p) a = a->p;
+        return a == b;
+    }
 }
 
 struct EulerTourTree{
-    int n;
-    vector<SplayNode*> nodes;
-    map<PII, SplayNode*> edges;
-    EulerTourTree() = default;
-    ~EulerTourTree() = default;
-    EulerTourTree(int n) : n(n), nodes(n+1) {
-        for(int i=1; i<=n; i++) nodes[i] = edges[{i,i}] = new SplayNode;
-    }
+    unordered_map<ll, splayTree::SplayNode*> edges;
+    EulerTourTree(int n){ for(int i=1; i<=n; i++) edges[f(i,i)] = new splayTree::SplayNode(i, i); }
     void reRoot(int v){
-        SplayNode *x = nodes[v]; splay(x);
-        auto lft = x->l, rgt = x->r;
-        if(lft == nullptr || rgt == nullptr) return;
-        x->l = x->r = lft->p = rgt->p = nullptr; x->update();
-        insertRight(concat(rgt, lft), x);
+        auto x = edges[f(v,v)]; splay(x);
+        auto xl = x->l, xr = x->r;
+        if(!xl || !xr) return;
+        x->l = x->r = xl->p = xr->p = nullptr; x->update();
+        concat(xr, xl); concat(xl->p, x);
     }
     void link(int u, int v){
+        if(is_connected(u,v)) return;
+        auto x = edges[f(u,u)], y = edges[f(v,v)];
         reRoot(u); reRoot(v);
-        SplayNode *x = nodes[u], *y = nodes[v];
-        if(sameTree(x, y)) return;
-        auto e1 = edges[{u,v}] = new SplayNode;
-        auto e2 = edges[{v,u}] = new SplayNode;
-        insertRight(x, e1);
-        concat(e1, y);
-        insertRight(y, e2);
+        splay(x); splay(y);
+        auto e1 = edges[f(u,v)] = new splayTree::SplayNode(u, v);
+        auto e2 = edges[f(v,u)] = new splayTree::SplayNode(v, u);
+        concat(x, e1); concat(e1, y); concat(e1, e2);
     }
-    void cut(int u, int v){
-        if(edges.find(PII(u, v)) == edges.end()) return;
-        SplayNode *x = edges[{u,v}], *y = edges[{v,u}];
+    void cut(int a, int b){
+        if(!edges.count(f(a,b))) return;
+        auto x = edges[f(a,b)], y = edges[f(b,a)];
         splay(x);
-        SplayNode *xl = x->l, *xr = x->r;
+        auto xl = x->l, xr = x->r;
         if(xl) xl->p = nullptr;
         if(xr) xr->p = nullptr;
         splay(y);
-        bool flag = xl != nullptr && (xl == y || xl->p != nullptr);
-        SplayNode *yl = y->l, *yr = y->r;
+        auto yl = y->l, yr = y->r;
+        bool flag = xl && (xl == y || xl->p);
         if(yl) yl->p = nullptr;
         if(yr) yr->p = nullptr;
-
-        if(flag) y->l && xr && concat(y->l, xr);
-        else y->r && xl && concat(xl, y->r);
-        x->l = x->r = x->p = y->l = y->r = y->p = nullptr;
+        if(flag) yl && xr && concat(yl, xr);
+        else xl && yr && concat(xl, yr);
+        edges.erase(f(a,b)); edges.erase(f(b,a));
         delete x; delete y;
-        edges.erase(PII(u, v));
-        edges.erase(PII(v, u));
     }
-    bool connected(int u, int v){
-        return sameTree(nodes[u], nodes[v]);
+    bool is_connected(int u, int v){
+        return is_same_tree(edges[f(u,u)], edges[f(v,v)]);
+    }
+    int size(int v){
+        auto x = edges[f(v,v)];
+        splay(x); return x->sz;
     }
 };
