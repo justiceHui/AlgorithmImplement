@@ -1,7 +1,7 @@
 # AlgorithmImplement
 algorithm implemention and also use as library
 
----
+**[https://github.com/justiceHui/icpc-teamnote](https://github.com/justiceHui/icpc-teamnote)로 옮겼습니다.**
 
 * DataStructure
     * ErasablePQ.cpp
